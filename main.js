@@ -6,11 +6,20 @@ class Block{
         this.timestamp = timestamp 
         this.data = data
         this.previousHash = previousHash
-        this.calculateHash()
+        this.hash = this.calculateHash()
+        this.nonce = 0
     }
     
     calculateHash(){
-        return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data)).toString()
+        return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data)+this.nonce).toString()
+    }
+    
+    mineBlock(difficulty){
+        while(this.hash.substring(0,difficulty) !== Array(difficulty + 1).join("0")){
+            this.nonce++
+            this.hash = this.calculateHash()
+        }
+        console.log("block mined: " + this.hash)
     }
 }
 
@@ -18,6 +27,7 @@ class Block{
 class BlockChain{
     constructor(){
         this.chain = [this.createGenesisBlock()]
+        this.difficulty = 2
     }
     
     createGenesisBlock(){
@@ -30,7 +40,8 @@ class BlockChain{
     
     addBlock(newBlock){
         newBlock.previousHash = this.getLatestBlock().hash
-        newBlock.hash = newBlock.calculateHash();
+        // newBlock.hash = newBlock.calculateHash();
+        newBlock.mineBlock(this.difficulty)
         this.chain.push(newBlock)
     }
     
@@ -53,23 +64,19 @@ class BlockChain{
 
 let kwartaPadala =new BlockChain()
 
+console.log("mining block 1...")
 kwartaPadala.addBlock(new Block(1,'02/02/2021',{
     amount : 500
 }))
 
+console.log("mining block 2...")
 kwartaPadala.addBlock(new Block(1,'02/03/2021',{
     amount : 540
 }))
 
-kwartaPadala.addBlock(new Block(1,'02/04/2021',{
-    amount : 530
-}))
 
-kwartaPadala.addBlock(new Block(1,'02/05/2021',{
-    amount : 590
-}))
+// console.log(JSON.stringify(kwartaPadala,null,4))
+
+// console.log(kwartaPadala.isChainValid())
 
 
-console.log(JSON.stringify(kwartaPadala,null,4))
-
-console.log(kwartaPadala.isChainValid())
